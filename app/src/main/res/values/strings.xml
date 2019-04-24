@@ -10,4 +10,5 @@
         <item>Spanish</item>
         <item>Korean</item>
     </string-array>
+    <string name="output_prompt">"Output here!"</string>
 </resources>
