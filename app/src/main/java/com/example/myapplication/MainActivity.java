@@ -20,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
     /** Default logging tag for messages from the main activity. */
     private static final String TAG = "ScanToTranslate";
 
+    /** Request code for taking photo. */
+    private static final int CAMERA_REQUEST_CODE = 233;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,37 +39,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /** Current file that we are using for our image request. */
-    private boolean photoRequestActive = false;
-
-    /** Whether a current photo request is being processed. */
-    private File currentPhotoFile = null;
 
     /** Take a photo using the camera. */
     private void startTakePhoto() {
-        if (photoRequestActive) {
-            Log.w(TAG, "Overlapping photo requests");
-            return;
-        }
 
         // Set up an intent to launch the camera app and have it take a photo for us
-        /*Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        currentPhotoFile = getSaveFilename();
-        if (takePictureIntent.resolveActivity(getPackageManager()) == null
-                || currentPhotoFile == null) {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) == null) {
             // Alert the user if there was a problem taking the photo
             Toast.makeText(getApplicationContext(), "Problem taking photo",
                     Toast.LENGTH_LONG).show();
             Log.w(TAG, "Problem taking photo");
             return;
         }
-
-        // Configure and launch the intent
-        Uri photoURI = FileProvider.getUriForFile(this,
-                "edu.illinois.cs.cs125.spring2019.mp3.fileprovider", currentPhotoFile);
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-        photoRequestActive = true;
-        startActivityForResult(takePictureIntent, IMAGE_CAPTURE_REQUEST_CODE);*/
+        startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE);
     }
 
     /**
