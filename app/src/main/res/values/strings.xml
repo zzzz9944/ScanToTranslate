@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">"My Application 3"</string>
+    <string-array name="language_option">
+        <item> </item>
+        <item>English</item>
+        <item>German</item>
+        <item>French</item>
+        <item>Chinese</item>
+        <item>Japanese</item>
+        <item>Spanish</item>
+        <item>Korean</item>
+    </string-array>
+</resources>
