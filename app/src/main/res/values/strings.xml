@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">"My Application 3"</string>
+    <string name="app_name">"Scan To Translate"</string>
     <string-array name="language_option">
         <item> </item>
         <item>English</item>
