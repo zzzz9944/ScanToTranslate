@@ -21,6 +21,9 @@ import java.net.URI;
 import java.net.HttpURLConnection;
 import org.json.JSONObject;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -46,11 +49,15 @@ public class MainActivity extends AppCompatActivity {
     /** Whether we can write to public storage. */
     private boolean canWriteToPublicStorage = false;
 
+    /** Request queue for our network requests. */
+    private RequestQueue requestQueue;
+
     /** Input imageView. */
     private ImageView inputImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestQueue = Volley.newRequestQueue(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         inputImage = findViewById(R.id.input);
@@ -156,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Activity with code" + requestCode + "failed.");
             return;
         }
-        Uri photoUri;
+        //Uri photoUri;
         if (requestCode == CAMERA_REQUEST_CODE) {
             Picasso.get().load(photoFile).fit().into(inputImage);
             if (canWriteToPublicStorage) {
@@ -166,4 +173,8 @@ public class MainActivity extends AppCompatActivity {
             Picasso.get().load(data.getData()).fit().into(inputImage);
         }
     }
+
+    /*private StringRequest getStringRequest() {
+
+    }*/
 }
