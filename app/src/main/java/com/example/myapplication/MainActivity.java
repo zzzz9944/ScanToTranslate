@@ -13,9 +13,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.URI;
@@ -27,6 +29,11 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.microsoft.projectoxford.vision.VisionServiceClient;
 import com.microsoft.projectoxford.vision.VisionServiceRestClient;
+import com.microsoft.projectoxford.vision.contract.OCR;
+import com.microsoft.projectoxford.vision.contract.Line;
+import com.microsoft.projectoxford.vision.contract.Region;
+import com.microsoft.projectoxford.vision.contract.Word;
+
 import com.example.myapplication.helper.ImageHelper;
 import com.squareup.picasso.Picasso;
 
@@ -35,6 +42,15 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import com.google.gson.Gson;
+import com.microsoft.projectoxford.vision.rest.VisionServiceException;
+import com.microsoft.projectoxford.vision.contract.LanguageCodes;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
     /** Input imageView. */
     private ImageView inputImage;
+
+    /** TextView for display result.*/
+    private TextView text;
 
     /** uri. */
     private Uri photoUri;
@@ -187,7 +206,80 @@ public class MainActivity extends AppCompatActivity {
             Picasso.get().load(photoUri).fit().into(inputImage);
         }
         if (photoUri != null) {
-            //photoBitmap = Image.load
+            photoBitmap = ImageHelper.loadSizeLimitedBitmapFromUri(photoUri, getContentResolver());
+            inputImage.setImageBitmap(photoBitmap);
+            doRecognize();
         }
+    }
+
+    public void doRecognize() {
+        text.setText("Recognizing");
+
+        try {
+            new doRequest().execute();
+        } catch (Exception e) {
+            text.setText("Error encountered");
+        }
+    }
+    private class doRequest extends AsyncTask<String, String, String> {
+        // Store error message
+        private Exception e = null;
+
+        public doRequest() {
+        }
+
+        @Override
+        protected String doInBackground(String... args) {
+            try {
+                return process();
+            } catch (Exception e) {
+                this.e = e;    // Store error
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String data) {
+            super.onPostExecute(data);
+            // Display based on error existence
+
+            if (e != null) {
+                text.setText("Error: " + e.getMessage());
+                this.e = null;
+            } else {
+                Gson gson = new Gson();
+                OCR r = gson.fromJson(data, OCR.class);
+
+                String result = "";
+                for (Region reg : r.regions) {
+                    for (Line line : reg.lines) {
+                        for (Word word : line.words) {
+                            result += word.text + " ";
+                        }
+                        result += "\n";
+                    }
+                    result += "\n\n";
+                }
+
+                text.setText(result);
+            }
+        }
+    }
+    private String process() throws VisionServiceException, IOException {
+        Gson gson = new Gson();
+
+        // Put the image into an input stream for detection.
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        photoBitmap.compress(Bitmap.CompressFormat.JPEG, 100, output);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(output.toByteArray());
+
+        OCR ocr;
+        ocr = this.client.recognizeText(inputStream, LanguageCodes.AutoDetect, true);
+
+        String result = gson.toJson(ocr);
+        Log.d("result", result);
+
+        return result;
     }
 }
