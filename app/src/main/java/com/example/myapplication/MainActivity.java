@@ -27,7 +27,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.microsoft.projectoxford.vision.VisionServiceClient;
 import com.microsoft.projectoxford.vision.VisionServiceRestClient;
-import com.microsoft.projectoxford.visionsample.helper.ImageHelper;
+import com.example.myapplication.helper.ImageHelper;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
