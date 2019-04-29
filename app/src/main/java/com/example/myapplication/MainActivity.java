@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -24,6 +25,9 @@ import org.json.JSONObject;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.microsoft.projectoxford.vision.VisionServiceClient;
+import com.microsoft.projectoxford.vision.VisionServiceRestClient;
+import com.microsoft.projectoxford.visionsample.helper.ImageHelper;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -50,16 +54,28 @@ public class MainActivity extends AppCompatActivity {
     private boolean canWriteToPublicStorage = false;
 
     /** Request queue for our network requests. */
-    private RequestQueue requestQueue;
+    //private RequestQueue requestQueue;
 
     /** Input imageView. */
     private ImageView inputImage;
 
+    /** uri. */
+    private Uri photoUri;
+
+    /** visionservice */
+    private VisionServiceClient client;
+
+    /** visionservice */
+    private Bitmap photoBitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestQueue = Volley.newRequestQueue(this);
+        //requestQueue = Volley.newRequestQueue(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (client == null) {
+            client = new VisionServiceRestClient("48c6dc9d14f048eb945c8ad728c5911f", "http://westus.api.cognitive.microsoft.com/vision/v2.0");
+        }
         inputImage = findViewById(R.id.input);
         final ImageButton openFile = findViewById(R.id.gallery);
         openFile.setOnClickListener(v -> {
@@ -117,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
             Log.w(TAG, "Problem taking photo");
             return;
         }
-        Uri photoUri = FileProvider.getUriForFile(MainActivity.this, "com.scantotranslate.fileprovider", photoFile);
+        photoUri = FileProvider.getUriForFile(MainActivity.this, "com.scantotranslate.fileprovider", photoFile);
         takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
         startActivityForResult(takePicture, CAMERA_REQUEST_CODE);
     }
@@ -166,15 +182,12 @@ public class MainActivity extends AppCompatActivity {
         //Uri photoUri;
         if (requestCode == CAMERA_REQUEST_CODE) {
             Picasso.get().load(photoFile).fit().into(inputImage);
-            if (canWriteToPublicStorage) {
-               //addPhotoToGallery()
-            }
         } else if (requestCode == READ_REQUEST_CODE) {
-            Picasso.get().load(data.getData()).fit().into(inputImage);
+            photoUri = data.getData();
+            Picasso.get().load(photoUri).fit().into(inputImage);
+        }
+        if (photoUri != null) {
+            //photoBitmap = Image.load
         }
     }
-
-    /*private StringRequest getStringRequest() {
-
-    }*/
 }

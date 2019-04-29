@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.myapplication"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -33,6 +33,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.android.volley:volley:1.1.1'
+    implementation 'com.microsoft.projectoxford:vision:1.0.395'
     //implementation 'org.apache.httpcomponents:httpclient:4.5.8'
     //implementation 'org.apache.httpcomponents:httpcore:4.4.11'
     //implementation 'org.json:json:20180130'
