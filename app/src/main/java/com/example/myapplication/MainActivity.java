@@ -76,18 +76,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     /** TextView for display result.*/
     private TextView text;
 
-    /** uri. */
+    /** Uri of the image file. */
     private Uri photoUri;
 
-    /** visionservice */
+    /** Microsoft Vision service client. */
     private VisionServiceClient client;
 
-    /** visionservice */
+    /** bitmap of the image file to display. */
     private Bitmap photoBitmap;
 
+    /** String to save the user selected source language to use in request url. */
     private String languageHintCode;
 
-    private String outputLanguageCode;
+    /** String to save the user selected output language to use in request url. */
+    private String outputLanguageCode = "en";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         final ImageButton takePhoto = findViewById(R.id.camara);
         takePhoto.setOnClickListener(v -> {
             Log.d(TAG, "Take photo button clicked");
-            startTakePhoto();
+            doRecognize();
         });
         /*
          * Here we check for permission to write to external storage and request it if necessary.
@@ -132,7 +134,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     File photoFile = null;
 
-    /** Take a photo using the camera. */
+    /**
+
     private void startTakePhoto() {
 
         // Set up an intent to launch the camera app and have it take a photo for us
@@ -153,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             return;
         }
         if (takePicture.resolveActivity(getPackageManager()) == null) {
-            // Alert the user if there was a problem taking the photo
             Toast.makeText(getApplicationContext(), "Problem taking photo",
                     Toast.LENGTH_LONG).show();
             Log.w(TAG, "Problem taking photo");
@@ -163,30 +165,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         takePicture.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
         startActivityForResult(takePicture, CAMERA_REQUEST_CODE);
     }
+    */
 
 
-    /**
-     * Get a new file location for saving.
-     *
-     * @return the path to the new file or null of the create failed
-     */
-    /*File getSaveFilename() {
-        String imageFileName = "STT_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
-                .format(new Date());
-        File storageDir;
-        if (canWriteToPublicStorage) {
-            storageDir = Environment
-                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        } else {
-            storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        }
-        try {
-            return File.createTempFile(imageFileName, ".jpg", storageDir);
-        } catch (IOException e) {
-            Log.w(TAG, "Problem saving file: " + e);
-            return null;
-        }
-    }*/
 
     /**
      * Start an open file dialog to look for image files.
@@ -205,22 +186,26 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             Log.w(TAG, "Activity with code" + requestCode + "failed.");
             return;
         }
-        //Uri photoUri;
-        if (requestCode == CAMERA_REQUEST_CODE) {
+        /*if (requestCode == CAMERA_REQUEST_CODE) {
             Picasso.get().load(photoFile).fit().into(inputImage);
         } else if (requestCode == READ_REQUEST_CODE) {
             photoUri = data.getData();
             Picasso.get().load(photoUri).fit().into(inputImage);
+        }*/
+        if (requestCode == READ_REQUEST_CODE) {
+            photoUri = data.getData();
         }
         if (photoUri != null) {
+            Log.d("uri: ", photoUri.toString());
             photoBitmap = ImageHelper.loadSizeLimitedBitmapFromUri(photoUri, getContentResolver());
+            //Log.d("bitmap:", photoBitmap.toString());
             inputImage.setImageBitmap(photoBitmap);
             doRecognize();
         }
     }
 
     public void doRecognize() {
-        text.setText("Recognizing...");
+        text.setText(R.string.recognizing_prompt);
 
         try {
             new doRequest().execute();
@@ -232,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private void setLanguageCode(int parentID, String languageCode) {
         if (parentID == R.id.languangeHint) {
             languageHintCode = languageCode;
-        } else {
+        } else if (!languageCode.equals("unk")){
             outputLanguageCode = languageCode;
         }
     }
@@ -277,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // Store error message
         private Exception e = null;
 
-        public doRequest() {
+        doRequest() {
         }
 
         @Override
@@ -334,7 +319,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return result;
     }
 
-    String url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0";
     String url2 = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=en&to=zh-Hans";
     String subscriptionKey = "f39799e99d0943d2aeaff6ff9de67164";
 
@@ -344,6 +328,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     // This function performs a POST request.
     public String Post(String input) throws IOException {
         MediaType mediaType = MediaType.parse("application/json");
+        String url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0";
+
         if (languageHintCode.equals("unk")) {
             url = url + "&to=" + outputLanguageCode;
         } else {

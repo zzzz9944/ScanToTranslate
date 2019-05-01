@@ -19,6 +19,7 @@
             android:id="@+id/input"
             android:layout_width="match_parent"
             android:layout_height="450dp"
+            android:contentDescription="@string/open_file"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
         <LinearLayout
@@ -46,13 +47,15 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                app:srcCompat="@android:drawable/ic_menu_camera" />
+                android:contentDescription="@string/redo_recognize"
+                app:srcCompat="@android:drawable/ic_menu_rotate" />
 
             <ImageButton
                 android:id="@+id/gallery"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:contentDescription="@string/open_file"
                 app:srcCompat="@android:drawable/ic_menu_gallery" />
 
         </LinearLayout>
@@ -61,6 +64,7 @@
             android:id="@+id/output"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:scrollbars="vertical"
             android:text="@string/output_prompt" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

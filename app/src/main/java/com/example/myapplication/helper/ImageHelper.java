@@ -44,6 +44,7 @@ import android.graphics.Rect;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,9 +57,6 @@ public class ImageHelper {
     // The maximum side length of the image to detect, to keep the size of image less than 4MB.
     // Resize the image if its side length is larger than the maximum.
     private static final int IMAGE_MAX_SIDE_LENGTH = 1280;
-
-    // Ratio to scale a detected face rectangle, the face rectangle scaled up looks more natural.
-    private static final double FACE_RECT_SCALE_RATIO = 1.3;
 
     // Decode image from imageUri, and resize according to the expectedMaxImageSideLength
     // If expectedMaxImageSideLength is
@@ -104,6 +102,7 @@ public class ImageHelper {
 
             return rotateBitmap(bitmap, getImageRotationAngle(imageUri, contentResolver));
         } catch (Exception e) {
+            Log.d("produce bitmap failed: ", e.getMessage());
             return null;
         }
     }

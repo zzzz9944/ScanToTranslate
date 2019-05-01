@@ -21,4 +21,7 @@
         <item>Korean</item>
     </string-array>
     <string name="output_prompt">"Output here!"</string>
+    <string name="recognizing_prompt">"Recognizing..."</string>
+    <string name="redo_recognize">"Redo recognize."</string>
+    <string name="open_file">"Select a image"</string>
 </resources>
