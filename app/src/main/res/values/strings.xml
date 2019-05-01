@@ -1,7 +1,17 @@
 <resources>
     <string name="app_name">"Scan To Translate"</string>
-    <string-array name="language_option">
-        <item> </item>
+    <string-array name="source_language_option">
+        <item>Select source language</item>
+        <item>English</item>
+        <item>German</item>
+        <item>French</item>
+        <item>Chinese</item>
+        <item>Japanese</item>
+        <item>Spanish</item>
+        <item>Korean</item>
+    </string-array>
+    <string-array name="output_language_option">
+        <item>Select output language</item>
         <item>English</item>
         <item>German</item>
         <item>French</item>

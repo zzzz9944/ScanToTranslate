@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="4"
-                android:entries="@array/language_option"
+                android:entries="@array/source_language_option"
                 android:spinnerMode="dropdown" />
 
             <Spinner
@@ -39,7 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="4"
-                android:entries="@array/language_option" />
+                android:entries="@array/output_language_option" />
 
             <ImageButton
                 android:id="@+id/camara"

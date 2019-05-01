@@ -315,7 +315,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 text.setText(e.getMessage());
                 this.e = null;
             } else {
-                text.setText(data);
+                JsonParser parser = new JsonParser();
+                Log.d("data: ", data);
+                String display = parser.parse(data)
+                        .getAsJsonArray()
+                        .get(0)
+                        .getAsJsonObject()
+                        .get("translations")
+                        .getAsJsonArray()
+                        .get(0)
+                        .getAsJsonObject()
+                        .get("text")
+                        .getAsString();
+                text.setText(display);
             }
         }
     }
@@ -336,6 +348,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     String url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0";
+    String url2 = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=en&to=zh-Hans";
     String subscriptionKey = "f39799e99d0943d2aeaff6ff9de67164";
 
     // Instantiates the OkHttpClient.
@@ -344,24 +357,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     // This function performs a POST request.
     public String Post(String input) throws IOException {
         MediaType mediaType = MediaType.parse("application/json");
-        url = url + "&from=" + languageHintCode + "&to=" + outputLanguageCode;
+        if (languageHintCode.equals("unk")) {
+            url = url + "&to=" + outputLanguageCode;
+        } else {
+            url = url + "&from=" + languageHintCode + "&to=" + outputLanguageCode;
+        }
         Log.d("request url: ", url);
-        RequestBody body = RequestBody.create(mediaType, input);
-        Log.d("body:", body.toString());
+        String inputobj = buildJsonArray(input);
+        Log.d("input obj: ", inputobj);
+        RequestBody body = RequestBody.create(mediaType, inputobj);
         Request request = new Request.Builder()
                 .url(url).post(body)
                 .addHeader("Ocp-Apim-Subscription-Key", subscriptionKey)
                 .addHeader("Content-type", "application/json").build();
         Response response = client1.newCall(request).execute();
         return response.body().string();
-    }
-
-    // This function prettifies the json response.
-    public static String prettify(String json_text) {
-        JsonParser parser = new JsonParser();
-        JsonElement json = parser.parse(json_text);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(json);
     }
 
     private String toStrings(String data) {
@@ -378,6 +388,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             result += "\n\n";
         }
         return result;
+    }
+
+    protected String buildJsonArray(String values) {
+        StringBuilder toReturn = new StringBuilder("[");
+        toReturn.append("\n\t{\"Text\": ");
+        toReturn.append("\"" + values + "\"}");
+        toReturn.append("\n]");
+        return toReturn.toString();
     }
 }
 
