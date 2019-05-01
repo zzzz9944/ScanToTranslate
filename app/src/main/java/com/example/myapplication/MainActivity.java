@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         }
         inputImage = findViewById(R.id.input);
         final ImageButton openFile = findViewById(R.id.gallery);
+        text = findViewById(R.id.output);
         openFile.setOnClickListener(v -> {
             Log.d(TAG, "Open file button clicked");
             startOpenFile();
@@ -245,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
             // Display based on error existence
 
             if (e != null) {
-                text.setText("Error: " + e.getMessage());
+                text.setText(e.getMessage());
                 this.e = null;
             } else {
                 Gson gson = new Gson();
