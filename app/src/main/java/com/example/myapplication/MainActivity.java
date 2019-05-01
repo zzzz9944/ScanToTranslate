@@ -15,13 +15,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.URI;
-import java.net.HttpURLConnection;
 import org.json.JSONObject;
 
 import com.android.volley.RequestQueue;
@@ -44,15 +46,25 @@ import java.util.Date;
 import java.util.Locale;
 import com.google.gson.Gson;
 import com.microsoft.projectoxford.vision.rest.VisionServiceException;
-import com.microsoft.projectoxford.vision.contract.LanguageCodes;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import com.google.gson.*;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     /** Constant to perform a read file request. */
     private static final int READ_REQUEST_CODE = 42;
@@ -69,9 +81,6 @@ public class MainActivity extends AppCompatActivity {
     /** Whether we can write to public storage. */
     private boolean canWriteToPublicStorage = false;
 
-    /** Request queue for our network requests. */
-    //private RequestQueue requestQueue;
-
     /** Input imageView. */
     private ImageView inputImage;
 
@@ -87,6 +96,12 @@ public class MainActivity extends AppCompatActivity {
     /** visionservice */
     private Bitmap photoBitmap;
 
+    private Spinner languangeHint;
+    private String languageHintCode;
+
+    private Spinner outputlanguage;
+    private String outputLanguageCode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //requestQueue = Volley.newRequestQueue(this);
@@ -96,6 +111,10 @@ public class MainActivity extends AppCompatActivity {
             client = new VisionServiceRestClient("48c6dc9d14f048eb945c8ad728c5911f", "http://westus.api.cognitive.microsoft.com/vision/v2.0");
         }
         inputImage = findViewById(R.id.input);
+        languangeHint = findViewById(R.id.languangeHint);
+        languangeHint.setOnItemSelectedListener(this);
+        outputlanguage = findViewById(R.id.outputlanguage);
+        outputlanguage.setOnItemSelectedListener(this);
         final ImageButton openFile = findViewById(R.id.gallery);
         text = findViewById(R.id.output);
         openFile.setOnClickListener(v -> {
@@ -222,6 +241,51 @@ public class MainActivity extends AppCompatActivity {
             text.setText("Error encountered");
         }
     }
+
+    private void setLanguageCode(int parentID, String languageCode) {
+        if (parentID == R.id.languangeHint) {
+            languageHintCode = languageCode;
+        } else {
+            outputLanguageCode = languageCode;
+        }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        int parentID = parent.getId();
+        switch (position) {
+            case 1:
+                setLanguageCode(parentID, "en");
+                break;
+            case 2:
+                setLanguageCode(parentID, "de");
+                break;
+            case 3:
+                setLanguageCode(parentID, "fr");
+                break;
+            case 4:
+                setLanguageCode(parentID, "zh-Hans");
+                break;
+            case 5:
+                setLanguageCode(parentID, "ja");
+                break;
+            case 6:
+                setLanguageCode(parentID, "es");
+                break;
+            case 7:
+                setLanguageCode(parentID, "ko");
+                break;
+            default:
+                setLanguageCode(parentID, "unk");
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
     private class doRequest extends AsyncTask<String, String, String> {
         // Store error message
         private Exception e = null;
@@ -232,7 +296,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... args) {
             try {
-                return process();
+                String result = process();
+                result = toStrings(result);
+                return Post(result);
             } catch (Exception e) {
                 this.e = e;    // Store error
             }
@@ -249,21 +315,7 @@ public class MainActivity extends AppCompatActivity {
                 text.setText(e.getMessage());
                 this.e = null;
             } else {
-                Gson gson = new Gson();
-                OCR r = gson.fromJson(data, OCR.class);
-
-                String result = "";
-                for (Region reg : r.regions) {
-                    for (Line line : reg.lines) {
-                        for (Word word : line.words) {
-                            result += word.text + " ";
-                        }
-                        result += "\n";
-                    }
-                    result += "\n\n";
-                }
-
-                text.setText(result);
+                text.setText(data);
             }
         }
     }
@@ -276,11 +328,56 @@ public class MainActivity extends AppCompatActivity {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(output.toByteArray());
 
         OCR ocr;
-        ocr = this.client.recognizeText(inputStream, LanguageCodes.AutoDetect, true);
+        ocr = this.client.recognizeText(inputStream, languageHintCode, true);
 
         String result = gson.toJson(ocr);
-        Log.d("result", result);
+        Log.d("result ", result);
+        return result;
+    }
 
+    String url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0";
+    String subscriptionKey = "f39799e99d0943d2aeaff6ff9de67164";
+
+    // Instantiates the OkHttpClient.
+    OkHttpClient client1 = new OkHttpClient();
+
+    // This function performs a POST request.
+    public String Post(String input) throws IOException {
+        MediaType mediaType = MediaType.parse("application/json");
+        url = url + "&from=" + languageHintCode + "&to=" + outputLanguageCode;
+        Log.d("request url: ", url);
+        RequestBody body = RequestBody.create(mediaType, input);
+        Log.d("body:", body.toString());
+        Request request = new Request.Builder()
+                .url(url).post(body)
+                .addHeader("Ocp-Apim-Subscription-Key", subscriptionKey)
+                .addHeader("Content-type", "application/json").build();
+        Response response = client1.newCall(request).execute();
+        return response.body().string();
+    }
+
+    // This function prettifies the json response.
+    public static String prettify(String json_text) {
+        JsonParser parser = new JsonParser();
+        JsonElement json = parser.parse(json_text);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(json);
+    }
+
+    private String toStrings(String data) {
+        Gson gson = new Gson();
+        OCR r = gson.fromJson(data, OCR.class);
+        String result = "";
+        for (Region reg : r.regions) {
+            for (Line line : reg.lines) {
+                for (Word word : line.words) {
+                    result += word.text + " ";
+                }
+                result += "\n";
+            }
+            result += "\n\n";
+        }
         return result;
     }
 }
+
