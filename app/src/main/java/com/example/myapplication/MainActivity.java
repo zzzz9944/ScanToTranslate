@@ -23,12 +23,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.net.URI;
-import org.json.JSONObject;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.microsoft.projectoxford.vision.VisionServiceClient;
 import com.microsoft.projectoxford.vision.VisionServiceRestClient;
 import com.microsoft.projectoxford.vision.contract.OCR;
@@ -49,18 +43,13 @@ import com.microsoft.projectoxford.vision.rest.VisionServiceException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
 import com.google.gson.*;
 
 
@@ -96,10 +85,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     /** visionservice */
     private Bitmap photoBitmap;
 
-    private Spinner languangeHint;
     private String languageHintCode;
 
-    private Spinner outputlanguage;
     private String outputLanguageCode;
 
     @Override
@@ -111,10 +98,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             client = new VisionServiceRestClient("48c6dc9d14f048eb945c8ad728c5911f", "http://westus.api.cognitive.microsoft.com/vision/v2.0");
         }
         inputImage = findViewById(R.id.input);
-        languangeHint = findViewById(R.id.languangeHint);
-        languangeHint.setOnItemSelectedListener(this);
-        outputlanguage = findViewById(R.id.outputlanguage);
-        outputlanguage.setOnItemSelectedListener(this);
+        Spinner languageHint = findViewById(R.id.languangeHint);
+        languageHint.setOnItemSelectedListener(this);
+        Spinner outputLanguage = findViewById(R.id.outputlanguage);
+        outputLanguage.setOnItemSelectedListener(this);
         final ImageButton openFile = findViewById(R.id.gallery);
         text = findViewById(R.id.output);
         openFile.setOnClickListener(v -> {
@@ -233,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void doRecognize() {
-        text.setText("Recognizing");
+        text.setText("Recognizing...");
 
         try {
             new doRequest().execute();
